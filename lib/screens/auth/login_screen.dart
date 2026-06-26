@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../core/theme.dart';
+import '../../core/router.dart';
 import '../../providers/auth_provider.dart';
 import '../../utils/validators.dart';
-import 'forgot_password_screen.dart';
-import 'register_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -27,17 +26,24 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void _submit() async {
-    if (_formKey.currentState!.validate()) {
-      final authProvider = Provider.of<AuthProvider>(context, listen: false);
-      final success = await authProvider.signIn(
-        _emailController.text.trim(),
-        _passwordController.text,
-      );
+    if (_formKey.currentState == null || !_formKey.currentState!.validate()) {
+      return;
+    }
 
-      if (!success && mounted) {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    
+    final success = await authProvider.signInWithEmailAndPassword(
+      email: _emailController.text.trim(),
+      password: _passwordController.text,
+    );
+
+    if (mounted) {
+      if (success) {
+        Navigator.pushReplacementNamed(context, AppRouter.dashboard);
+      } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(authProvider.errorMessage ?? 'Failed to log in.'),
+            content: Text(authProvider.errorMessage ?? 'Login failed. Please try again.'),
             backgroundColor: Colors.redAccent,
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -50,7 +56,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
-
+    
     return Scaffold(
       body: SafeArea(
         child: Center(
@@ -78,7 +84,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Log in to your TaskFlow account to manage daily tasks. Use test@test.com & password to sign in.',
+                    'Log in to your TaskFlow account to sync daily tasks.',
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: Colors.grey,
@@ -131,12 +137,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     alignment: Alignment.centerRight,
                     child: TextButton(
                       onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const ForgotPasswordScreen(),
-                          ),
-                        );
+                        Navigator.pushNamed(context, AppRouter.forgotPassword);
                       },
                       child: const Text(
                         'Forgot Password?',
@@ -163,18 +164,14 @@ class _LoginScreenState extends State<LoginScreen> {
                   const SizedBox(height: 24),
 
                   // Register Router Link
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                  Wrap(
+                    alignment: WrapAlignment.center,
+                    crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
                       const Text("Don't have an account?"),
                       TextButton(
                         onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const RegisterScreen(),
-                            ),
-                          );
+                          Navigator.pushNamed(context, AppRouter.register);
                         },
                         child: const Text(
                           'Register',

@@ -16,10 +16,17 @@ class TaskListScreen extends StatefulWidget {
 class _TaskListScreenState extends State<TaskListScreen> {
   final _searchController = TextEditingController();
   String _selectedCategory = 'All';
-  String _selectedPriorityFilter = 'All'; // All, Low, Medium, High
-  String _selectedStatusFilter = 'All'; // All, Active, Completed
+  String _selectedPriorityFilter = 'All'; // Options: All, Low, Medium, High
+  String _selectedStatusFilter = 'All'; // Options: All, Active, Completed
 
-  final List<String> _categories = ['All', 'Work', 'Personal', 'Shopping', 'Health', 'Others'];
+  final List<String> _categories = [
+    'All',
+    'Work',
+    'Personal',
+    'Shopping',
+    'Health',
+    'Others',
+  ];
 
   @override
   void dispose() {
@@ -27,85 +34,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
     super.dispose();
   }
 
-  void _openFilterDialog() {
-    showModalBottomSheet(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setModalState) {
-            final isDark = Theme.of(context).brightness == Brightness.dark;
-            return Container(
-              padding: const EdgeInsets.all(20.0),
-              color: isDark ? const Color(0xFF1F2937) : Colors.white,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const Text(
-                    'Filters',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-                  ),
-                  const Divider(),
-                  const SizedBox(height: 12),
-                  
-                  // Priority Filter
-                  const Text('Priority', style: TextStyle(fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 8),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: ['All', 'Low', 'Medium', 'High'].map((prio) {
-                      final selected = _selectedPriorityFilter == prio;
-                      return ChoiceChip(
-                        label: Text(prio),
-                        selected: selected,
-                        onSelected: (val) {
-                          if (val) {
-                            setModalState(() => _selectedPriorityFilter = prio);
-                            setState(() {}); // Re-render main list
-                          }
-                        },
-                      );
-                    }).toList(),
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Completion Status Filter
-                  const Text('Status', style: TextStyle(fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 8),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: ['All', 'Active', 'Completed'].map((status) {
-                      final selected = _selectedStatusFilter == status;
-                      return ChoiceChip(
-                        label: Text(status),
-                        selected: selected,
-                        onSelected: (val) {
-                          if (val) {
-                            setModalState(() => _selectedStatusFilter = status);
-                            setState(() {}); // Re-render main list
-                          }
-                        },
-                      );
-                    }).toList(),
-                  ),
-                  const SizedBox(height: 24),
-                  
-                  ElevatedButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: const Text('Apply Filters'),
-                  ),
-                ],
-              ),
-            );
-          },
-        );
-      },
-    );
-  }
-
+  // Opens the sheet to add a new task
   void _openAddTaskSheet() {
     showModalBottomSheet(
       context: context,
@@ -115,6 +44,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
     );
   }
 
+  // Opens the sheet to edit an existing task
   void _openEditTaskSheet(TaskModel task) {
     showModalBottomSheet(
       context: context,
@@ -129,21 +59,25 @@ class _TaskListScreenState extends State<TaskListScreen> {
     final taskProvider = Provider.of<TaskProvider>(context);
     final tasks = taskProvider.tasks;
 
-    // Apply Search and Filters locally
+    // Apply Search queries and filter selections locally on the tasks list
     final filteredTasks = tasks.where((task) {
       // 1. Search Query Filter
       final query = _searchController.text.toLowerCase().trim();
-      final matchesSearch = query.isEmpty ||
+      final matchesSearch =
+          query.isEmpty ||
           task.title.toLowerCase().contains(query) ||
           task.description.toLowerCase().contains(query);
 
       // 2. Category Filter
-      final matchesCategory = _selectedCategory == 'All' || task.category == _selectedCategory;
+      final matchesCategory =
+          _selectedCategory == 'All' || task.category == _selectedCategory;
 
       // 3. Priority Filter
-      final matchesPriority = _selectedPriorityFilter == 'All' || task.priority == _selectedPriorityFilter;
+      final matchesPriority =
+          _selectedPriorityFilter == 'All' ||
+          task.priority == _selectedPriorityFilter;
 
-      // 4. Status Filter
+      // 4. Status Filter (Active / Completed)
       bool matchesStatus = true;
       if (_selectedStatusFilter == 'Active') {
         matchesStatus = !task.completed;
@@ -151,49 +85,118 @@ class _TaskListScreenState extends State<TaskListScreen> {
         matchesStatus = task.completed;
       }
 
-      return matchesSearch && matchesCategory && matchesPriority && matchesStatus;
+      return matchesSearch &&
+          matchesCategory &&
+          matchesPriority &&
+          matchesStatus;
     }).toList();
 
     return Scaffold(
       body: SafeArea(
         child: Column(
           children: [
-            // Search and Filter Bar
+            // Search Input Bar
             Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 16.0,
+                vertical: 12.0,
+              ),
+              child: TextField(
+                controller: _searchController,
+                onChanged: (val) => setState(() {}),
+                decoration: InputDecoration(
+                  hintText: 'Search tasks...',
+                  prefixIcon: const Icon(Icons.search_rounded),
+                  suffixIcon: _searchController.text.isNotEmpty
+                      ? IconButton(
+                          icon: const Icon(Icons.clear_rounded),
+                          onPressed: () {
+                            _searchController.clear();
+                            setState(() {});
+                          },
+                        )
+                      : null,
+                ),
+              ),
+            ),
+
+            // Inline Filters (Priority & Status) - Beginner friendly row of dropdown buttons
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 16.0,
+                vertical: 4.0,
+              ),
               child: Row(
                 children: [
                   Expanded(
-                    child: TextField(
-                      controller: _searchController,
-                      onChanged: (val) => setState(() {}),
-                      decoration: InputDecoration(
-                        hintText: 'Search tasks...',
-                        prefixIcon: const Icon(Icons.search_rounded),
-                        suffixIcon: _searchController.text.isNotEmpty
-                            ? IconButton(
-                                icon: const Icon(Icons.clear_rounded),
-                                onPressed: () {
-                                  _searchController.clear();
-                                  setState(() {});
-                                },
-                              )
-                            : null,
+                    child: DropdownButtonFormField<String>(
+                      isExpanded: true,
+                      initialValue: _selectedPriorityFilter,
+                      decoration: const InputDecoration(
+                        labelText: 'Priority',
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
+                        border: OutlineInputBorder(),
                       ),
+                      items: ['All', 'Low', 'Medium', 'High'].map((
+                        String priority,
+                      ) {
+                        return DropdownMenuItem<String>(
+                          value: priority,
+                          child: Text(
+                            priority,
+                            style: const TextStyle(fontSize: 13),
+                          ),
+                        );
+                      }).toList(),
+                      onChanged: (val) {
+                        if (val != null) {
+                          setState(() {
+                            _selectedPriorityFilter = val;
+                          });
+                        }
+                      },
                     ),
                   ),
                   const SizedBox(width: 12),
-                  IconButton.filledTonal(
-                    style: IconButton.styleFrom(
-                      padding: const EdgeInsets.all(16),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  Expanded(
+                    child: DropdownButtonFormField<String>(
+                      isExpanded: true,
+                      initialValue: _selectedStatusFilter,
+                      decoration: const InputDecoration(
+                        labelText: 'Status',
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
+                        border: OutlineInputBorder(),
+                      ),
+                      items: ['All', 'Active', 'Completed'].map((
+                        String status,
+                      ) {
+                        return DropdownMenuItem<String>(
+                          value: status,
+                          child: Text(
+                            status,
+                            style: const TextStyle(fontSize: 13),
+                          ),
+                        );
+                      }).toList(),
+                      onChanged: (val) {
+                        if (val != null) {
+                          setState(() {
+                            _selectedStatusFilter = val;
+                          });
+                        }
+                      },
                     ),
-                    icon: const Icon(Icons.filter_list_rounded),
-                    onPressed: _openFilterDialog,
                   ),
                 ],
               ),
             ),
+            const SizedBox(height: 12),
 
             // Horizontal Scrollable Category Pills
             SizedBox(
@@ -210,7 +213,9 @@ class _TaskListScreenState extends State<TaskListScreen> {
                     child: ChoiceChip(
                       showCheckmark: false,
                       labelStyle: TextStyle(
-                        color: isSelected ? Colors.white : Theme.of(context).colorScheme.onSurface,
+                        color: isSelected
+                            ? Colors.white
+                            : Theme.of(context).colorScheme.onSurface,
                         fontWeight: FontWeight.w600,
                       ),
                       selectedColor: AppTheme.primarySeedColor,
@@ -230,19 +235,23 @@ class _TaskListScreenState extends State<TaskListScreen> {
             ),
             const SizedBox(height: 16),
 
-            // Task List View or Empty State
+            // Task List View or Empty State representation
             Expanded(
               child: taskProvider.isLoading
                   ? const Center(child: CircularProgressIndicator())
                   : filteredTasks.isEmpty
-                      ? _buildEmptyState(context)
-                      : ListView.builder(
-                          padding: const EdgeInsets.only(bottom: 80),
-                          itemCount: filteredTasks.length,
-                          itemBuilder: (context, index) {
-                            return _buildTaskCard(context, filteredTasks[index]);
-                          },
-                        ),
+                  ? _buildEmptyState(context)
+                  : ListView.builder(
+                      padding: const EdgeInsets.only(
+                        bottom: 80,
+                        left: 8,
+                        right: 8,
+                      ),
+                      itemCount: filteredTasks.length,
+                      itemBuilder: (context, index) {
+                        return _buildTaskCard(context, filteredTasks[index]);
+                      },
+                    ),
             ),
           ],
         ),
@@ -257,8 +266,10 @@ class _TaskListScreenState extends State<TaskListScreen> {
     );
   }
 
+  // Displayed when no tasks match the filters
   Widget _buildEmptyState(BuildContext context) {
-    final hasActiveFilters = _searchController.text.isNotEmpty ||
+    final hasActiveFilters =
+        _searchController.text.isNotEmpty ||
         _selectedCategory != 'All' ||
         _selectedPriorityFilter != 'All' ||
         _selectedStatusFilter != 'All';
@@ -270,7 +281,9 @@ class _TaskListScreenState extends State<TaskListScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
-              hasActiveFilters ? Icons.search_off_rounded : Icons.checklist_rounded,
+              hasActiveFilters
+                  ? Icons.search_off_rounded
+                  : Icons.checklist_rounded,
               size: 72,
               color: Colors.grey[400],
             ),
@@ -307,14 +320,15 @@ class _TaskListScreenState extends State<TaskListScreen> {
     );
   }
 
+  // Reusable card to display information about a single task
   Widget _buildTaskCard(BuildContext context, TaskModel task) {
     final taskProvider = Provider.of<TaskProvider>(context, listen: false);
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
-    // Check if task is overdue
+
+    // Check if task is past due date and not completed
     final isOverdue = !task.completed && task.dueDate.isBefore(DateTime.now());
 
-    // Color code priority badge
+    // Assign color coding to priorities
     Color priorityColor;
     switch (task.priority) {
       case 'High':
@@ -328,40 +342,39 @@ class _TaskListScreenState extends State<TaskListScreen> {
     }
 
     return Card(
+      elevation: 1,
+      margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
       child: InkWell(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(12),
         onTap: () => _openEditTaskSheet(task),
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(12.0),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Custom checkbox toggle
-              Transform.scale(
-                scale: 1.1,
-                child: Checkbox(
-                  value: task.completed,
-                  activeColor: AppTheme.secondaryColor,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
-                  onChanged: (_) {
-                    taskProvider.toggleTaskComplete(task);
-                  },
-                ),
+              // Checkbox selector
+              Checkbox(
+                value: task.completed,
+                activeColor: AppTheme.secondaryColor,
+                onChanged: (_) {
+                  taskProvider.toggleTaskComplete(task);
+                },
               ),
               const SizedBox(width: 8),
 
-              // Text info
+              // Title and details
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Title
                     Text(
                       task.title,
                       style: TextStyle(
-                        fontSize: 16,
+                        fontSize: 15,
                         fontWeight: FontWeight.bold,
-                        decoration: task.completed ? TextDecoration.lineThrough : null,
+                        decoration: task.completed
+                            ? TextDecoration.lineThrough
+                            : null,
                         color: task.completed
                             ? Colors.grey
                             : (isDark ? Colors.white : const Color(0xFF1F2937)),
@@ -369,77 +382,97 @@ class _TaskListScreenState extends State<TaskListScreen> {
                     ),
                     const SizedBox(height: 4),
 
-                    // Description (if present)
                     if (task.description.isNotEmpty) ...[
                       Text(
                         task.description,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          fontSize: 13,
-                          color: task.completed ? Colors.grey[600] : Colors.grey[500],
+                          fontSize: 12,
+                          color: task.completed
+                              ? Colors.grey[600]
+                              : Colors.grey[500],
                         ),
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 8),
                     ],
 
-                    // Meta Wrap (pills & due dates)
+                    // Tags and schedule text
                     Wrap(
                       spacing: 8,
                       runSpacing: 8,
                       crossAxisAlignment: WrapCrossAlignment.center,
                       children: [
-                        // Category tag
+                        // Category Pill
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
                           decoration: BoxDecoration(
-                            color: isDark ? const Color(0xFF374151) : const Color(0xFFF3F4F6),
-                            borderRadius: BorderRadius.circular(8),
+                            color: isDark
+                                ? const Color(0xFF374151)
+                                : const Color(0xFFF3F4F6),
+                            borderRadius: BorderRadius.circular(6),
                           ),
                           child: Text(
                             task.category,
-                            style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
+                            style: const TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
 
-                        // Priority Tag
+                        // Priority Pill
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
                           decoration: BoxDecoration(
                             color: priorityColor.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: priorityColor.withValues(alpha: 0.2)),
+                            borderRadius: BorderRadius.circular(6),
+                            border: Border.all(
+                              color: priorityColor.withValues(alpha: 0.2),
+                            ),
                           ),
                           child: Text(
                             task.priority,
                             style: TextStyle(
-                              fontSize: 11,
+                              fontSize: 10,
                               fontWeight: FontWeight.bold,
                               color: priorityColor,
                             ),
                           ),
                         ),
 
-                        // Due Date Icon and Text
+                        // Due Date Info
                         Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Icon(
                               Icons.access_time_rounded,
-                              size: 14,
+                              size: 13,
                               color: isOverdue
                                   ? Colors.redAccent
-                                  : (task.completed ? Colors.grey : Colors.grey[500]),
+                                  : (task.completed
+                                        ? Colors.grey
+                                        : Colors.grey[500]),
                             ),
                             const SizedBox(width: 4),
                             Text(
                               DateFormat('d MMM, h:mm a').format(task.dueDate),
                               style: TextStyle(
-                                fontSize: 11,
-                                fontWeight: isOverdue ? FontWeight.bold : FontWeight.normal,
+                                fontSize: 10,
+                                fontWeight: isOverdue
+                                    ? FontWeight.bold
+                                    : FontWeight.normal,
                                 color: isOverdue
                                     ? Colors.redAccent
-                                    : (task.completed ? Colors.grey : Colors.grey[600]),
+                                    : (task.completed
+                                          ? Colors.grey
+                                          : Colors.grey[600]),
                               ),
                             ),
                           ],

@@ -27,7 +27,7 @@ class AppTheme {
       ),
       appBarTheme: const AppBarTheme(
         elevation: 0,
-        backgroundColor: Colors.transparent,
+        backgroundColor: Colors.white,
         foregroundColor: Color(0xFF1F2937),
         centerTitle: true,
         titleTextStyle: TextStyle(
@@ -45,16 +45,16 @@ class AppTheme {
           ),
           backgroundColor: primarySeedColor,
           foregroundColor: Colors.white,
-          textStyle: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-          ),
+          textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: Colors.white,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 16,
+        ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: Color(0xFFD1D5DB), width: 1),
@@ -72,6 +72,10 @@ class AppTheme {
           borderSide: const BorderSide(color: Colors.red, width: 1),
         ),
         hintStyle: const TextStyle(color: Color(0xFF9CA3AF), fontSize: 14),
+      ),
+      navigationBarTheme: const NavigationBarThemeData(
+        backgroundColor: Colors.white,
+        elevation: 0,
       ),
     );
   }
@@ -116,16 +120,16 @@ class AppTheme {
           ),
           backgroundColor: primarySeedColor,
           foregroundColor: Colors.white,
-          textStyle: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-          ),
+          textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: const Color(0xFF1F2937),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 16,
+        ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: Color(0xFF374151), width: 1),
@@ -143,6 +147,10 @@ class AppTheme {
           borderSide: const BorderSide(color: Colors.redAccent, width: 1),
         ),
         hintStyle: const TextStyle(color: Color(0xFF9CA3AF), fontSize: 14),
+      ),
+      navigationBarTheme: const NavigationBarThemeData(
+        backgroundColor: Color(0xFF111827),
+        elevation: 0,
       ),
     );
   }

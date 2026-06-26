@@ -93,13 +93,14 @@ class _TaskDetailSheetState extends State<TaskDetailSheet> {
       bool success;
       if (widget.task == null) {
         // Create Mode
-        success = await taskProvider.addTask(
+        final createdTask = await taskProvider.addTask(
           title: _titleController.text.trim(),
           description: _descController.text.trim(),
           category: _selectedCategory,
           priority: _selectedPriority,
           dueDate: dueDateTime,
         );
+        success = createdTask != null;
       } else {
         // Edit Mode
         final updatedTask = widget.task!.copyWith(
@@ -195,9 +196,11 @@ class _TaskDetailSheetState extends State<TaskDetailSheet> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    widget.task == null ? 'Create New Task' : 'Edit Task',
-                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  Expanded(
+                    child: Text(
+                      widget.task == null ? 'Create New Task' : 'Edit Task',
+                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
                   ),
                   if (widget.task != null)
                     IconButton(
@@ -242,6 +245,7 @@ class _TaskDetailSheetState extends State<TaskDetailSheet> {
                   // Category Dropdown
                   Expanded(
                     child: DropdownButtonFormField<String>(
+                      isExpanded: true,
                       initialValue: _selectedCategory,
                       decoration: const InputDecoration(
                         labelText: 'Category',
@@ -263,6 +267,7 @@ class _TaskDetailSheetState extends State<TaskDetailSheet> {
                   // Priority Dropdown
                   Expanded(
                     child: DropdownButtonFormField<String>(
+                      isExpanded: true,
                       initialValue: _selectedPriority,
                       decoration: const InputDecoration(
                         labelText: 'Priority',

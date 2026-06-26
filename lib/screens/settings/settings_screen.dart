@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/theme.dart';
+import '../../core/router.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/theme_provider.dart';
+import '../../providers/task_provider.dart';
+import '../../providers/notification_provider.dart';
 import '../../services/notification_service.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -38,44 +41,61 @@ class _SettingsScreenState extends State<SettingsScreen> {
       _dailyReminderEnabled = value;
     });
 
-    final notifService = NotificationService();
     if (value) {
-      // Re-schedule daily check-in reminder at 9:00 AM
-      await notifService.scheduleDailyReminder(
-        id: 999,
-        hour: 9,
-        minute: 0,
-        title: 'TaskFlow Check-in',
-        body: 'Start your day by reviewing your scheduled tasks!',
-      );
+      await NotificationService().scheduleDailyCheckIn();
     } else {
-      // Cancel the daily reminder (its ID is 999)
-      final localPlugin = notifService;
-      await localPlugin.cancelTaskReminder('999'); // Cancel using hash matching ID 999
+      await NotificationService().cancelDailyCheckIn();
     }
   }
 
   Future<void> _toggleTaskReminders(bool value) async {
+    final taskProvider = Provider.of<TaskProvider>(context, listen: false);
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('task_reminder_enabled', value);
     setState(() {
       _taskReminderEnabled = value;
     });
+
+    // If task reminders are disabled, cancel all scheduled task due notifications
+    if (!value) {
+      for (var task in taskProvider.tasks) {
+        await NotificationService().cancelTaskNotification(task.id);
+      }
+    } else {
+      // Re-schedule future pending tasks
+      for (var task in taskProvider.tasks) {
+        if (!task.completed && task.dueDate.isAfter(DateTime.now())) {
+          await NotificationService().scheduleTaskNotification(task);
+        }
+      }
+    }
   }
 
   void _logout() async {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    // Provider will automatically clear task streams upon logging out
+    final taskProvider = Provider.of<TaskProvider>(context, listen: false);
+    final notifProvider = Provider.of<NotificationProvider>(context, listen: false);
+    
+    // Clear in-memory caches
+    taskProvider.clear();
+    notifProvider.clear();
+    
+    // Sign out from Auth provider (triggers real Firebase signout)
     await authProvider.signOut();
+    
+    // Redirect cleanly to login screen and clear navigation history
+    if (mounted) {
+      Navigator.pushNamedAndRemoveUntil(context, AppRouter.login, (route) => false);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final authProvider = Provider.of<AuthProvider>(context);
     final themeProvider = Provider.of<ThemeProvider>(context);
+    final authProvider = Provider.of<AuthProvider>(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     
-    final userEmail = authProvider.user?.email ?? "test@test.com";
+    final userEmail = authProvider.userEmail ?? "user@taskflow.com";
 
     return Scaffold(
       body: SafeArea(
@@ -127,7 +147,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           ),
                           const SizedBox(height: 4),
                           const Text(
-                            'Offline Local Storage Mode',
+                            'Firebase Cloud Sync Active',
                             style: TextStyle(
                               color: AppTheme.secondaryColor,
                               fontSize: 12,
@@ -162,14 +182,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
             SwitchListTile(
               secondary: const Icon(Icons.alarm_rounded, color: AppTheme.primarySeedColor),
               title: const Text('Daily Summary Reminder', style: TextStyle(fontWeight: FontWeight.w600)),
-              subtitle: const Text('Receive a task check-in alert every morning'),
+              subtitle: const Text('Receive a task check-in alert every morning at 9:00 AM'),
               value: _dailyReminderEnabled,
               onChanged: _toggleDailyReminder,
             ),
             SwitchListTile(
               secondary: const Icon(Icons.notifications_active_rounded, color: AppTheme.primarySeedColor),
               title: const Text('Task Due Reminders', style: TextStyle(fontWeight: FontWeight.w600)),
-              subtitle: const Text('Trigger alarms at task scheduled due dates'),
+              subtitle: const Text('Trigger local alerts at task scheduled due dates'),
               value: _taskReminderEnabled,
               onChanged: _toggleTaskReminders,
             ),
@@ -191,7 +211,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             // Footer credits
             Center(
               child: Text(
-                'TaskFlow v1.0.0 (Clean Architecture)',
+                'TaskFlow v1.0.0 (Firebase Sync Mode)',
                 style: TextStyle(color: Colors.grey[500], fontSize: 12),
               ),
             ),

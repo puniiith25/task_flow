@@ -1,63 +1,43 @@
-import 'dart:async';
-
-class MockUser {
-  final String uid;
-  final String email;
-
-  MockUser({required this.uid, required this.email});
-}
+import 'package:firebase_auth/firebase_auth.dart';
 
 class AuthService {
-  final StreamController<MockUser?> _authStateController = StreamController<MockUser?>.broadcast();
-  MockUser? _currentUser;
-
-  AuthService() {
-    _authStateController.add(null);
-  }
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
   /// Stream of user authentication state changes
-  Stream<MockUser?> get authStateChanges => _authStateController.stream;
+  Stream<User?> get authStateChanges => _auth.authStateChanges();
 
   /// Gets the currently authenticated user
-  MockUser? get currentUser => _currentUser;
+  User? get currentUser => _auth.currentUser;
 
   /// Signs in the user with email and password
-  Future<MockUser> signInWithEmailAndPassword({
+  Future<UserCredential> signInWithEmailAndPassword({
     required String email,
     required String password,
   }) async {
-    await Future.delayed(const Duration(milliseconds: 600));
-    if (email == "test@test.com" && password == "password") {
-      _currentUser = MockUser(uid: "mock-uid-123", email: email);
-      _authStateController.add(_currentUser);
-      return _currentUser!;
-    } else {
-      throw Exception("Incorrect email or password.");
-    }
+    return await _auth.signInWithEmailAndPassword(
+      email: email,
+      password: password,
+    );
   }
 
   /// Registers a new user with email and password
-  Future<MockUser> createUserWithEmailAndPassword({
+  Future<UserCredential> createUserWithEmailAndPassword({
     required String email,
     required String password,
   }) async {
-    await Future.delayed(const Duration(milliseconds: 600));
-    _currentUser = MockUser(
-      uid: "mock-uid-${DateTime.now().millisecondsSinceEpoch}",
+    return await _auth.createUserWithEmailAndPassword(
       email: email,
+      password: password,
     );
-    _authStateController.add(_currentUser);
-    return _currentUser!;
   }
 
   /// Sends a password recovery link to the user's email
   Future<void> sendPasswordResetEmail({required String email}) async {
-    await Future.delayed(const Duration(milliseconds: 400));
+    await _auth.sendPasswordResetEmail(email: email);
   }
 
   /// Logs the current user out of the application
   Future<void> signOut() async {
-    _currentUser = null;
-    _authStateController.add(null);
+    await _auth.signOut();
   }
 }

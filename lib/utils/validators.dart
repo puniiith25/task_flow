@@ -17,7 +17,7 @@ class Validators {
     return null;
   }
 
-  /// Validates password strength (minimum 6 characters)
+  /// Validates password strength (minimum 6 characters as required by Firebase)
   static String? validatePassword(String? value) {
     if (value == null || value.isEmpty) {
       return 'Password is required';

@@ -1,113 +1,152 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
-import '../repositories/auth_repository.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../services/auth_service.dart';
 
-enum AuthStatus {
-  unauthenticated,
-  authenticating,
-  authenticated,
-  error,
-}
-
 class AuthProvider extends ChangeNotifier {
-  final AuthRepository _authRepository;
+  final AuthService _authService = AuthService();
   
-  AuthStatus _status = AuthStatus.unauthenticated;
-  MockUser? _user;
+  String? _userId;
+  String? _userEmail;
+  bool _isLoading = false;
   String? _errorMessage;
+  
+  StreamSubscription<User?>? _firebaseAuthSubscription;
 
-  AuthStatus get status => _status;
-  MockUser? get user => _user;
+  // Getters
+  bool get isAuthenticated => _userId != null;
+  String? get userId => _userId;
+  String? get userEmail => _userEmail;
+  bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
-  bool get isLoading => _status == AuthStatus.authenticating;
-  bool get isAuthenticated => _status == AuthStatus.authenticated;
 
-  AuthProvider(this._authRepository) {
-    _init();
+  AuthProvider() {
+    _initializeAuth();
   }
 
-  void _init() {
-    _authRepository.authStateChanges.listen((MockUser? user) {
-      if (user != null) {
-        _user = user;
-        _status = AuthStatus.authenticated;
-      } else {
-        _user = null;
-        _status = AuthStatus.unauthenticated;
-      }
-      _errorMessage = null;
+  @override
+  void dispose() {
+    _firebaseAuthSubscription?.cancel();
+    super.dispose();
+  }
+
+  /// Initialize Auth state, listening to Firebase Auth changes
+  Future<void> _initializeAuth() async {
+    try {
+      _isLoading = true;
+      // Listen to real Firebase Auth changes
+      _firebaseAuthSubscription = _authService.authStateChanges.listen((User? user) {
+        if (user != null) {
+          _userId = user.uid;
+          _userEmail = user.email;
+        } else {
+          _userId = null;
+          _userEmail = null;
+        }
+        _isLoading = false;
+        notifyListeners();
+      });
+    } catch (e) {
+      _isLoading = false;
+      _errorMessage = e.toString();
+      debugPrint('Firebase Auth initialization error: $e');
       notifyListeners();
-    });
+    }
   }
 
-  /// Sign In
-  Future<bool> signIn(String email, String password) async {
-    _status = AuthStatus.authenticating;
-    _errorMessage = null;
-    notifyListeners();
+  /// Sign in with Email and Password
+  Future<bool> signInWithEmailAndPassword({
+    required String email,
+    required String password,
+  }) async {
+    _setLoading(true);
+    _clearError();
 
     try {
-      _user = await _authRepository.signIn(email, password);
-      _status = AuthStatus.authenticated;
-      notifyListeners();
+      await _authService.signInWithEmailAndPassword(
+        email: email.trim(),
+        password: password,
+      );
+      // State is updated automatically by authStateChanges subscription
       return true;
-    } on AuthException catch (e) {
-      _status = AuthStatus.error;
-      _errorMessage = e.message;
-      notifyListeners();
+    } on FirebaseAuthException catch (e) {
+      _errorMessage = e.message ?? 'An error occurred during authentication.';
+      _setLoading(false);
+      return false;
+    } catch (e) {
+      _errorMessage = e.toString();
+      _setLoading(false);
       return false;
     }
   }
 
-  /// Sign Up
-  Future<bool> signUp(String email, String password) async {
-    _status = AuthStatus.authenticating;
-    _errorMessage = null;
-    notifyListeners();
+  /// Register/Create a new user with Email and Password
+  Future<bool> createUserWithEmailAndPassword({
+    required String email,
+    required String password,
+  }) async {
+    _setLoading(true);
+    _clearError();
 
     try {
-      _user = await _authRepository.signUp(email, password);
-      _status = AuthStatus.authenticated;
-      notifyListeners();
+      await _authService.createUserWithEmailAndPassword(
+        email: email.trim(),
+        password: password,
+      );
+      // State is updated automatically by authStateChanges subscription
       return true;
-    } on AuthException catch (e) {
-      _status = AuthStatus.error;
-      _errorMessage = e.message;
-      notifyListeners();
+    } on FirebaseAuthException catch (e) {
+      _errorMessage = e.message ?? 'An error occurred during registration.';
+      _setLoading(false);
+      return false;
+    } catch (e) {
+      _errorMessage = e.toString();
+      _setLoading(false);
       return false;
     }
   }
 
-  /// Send password reset email
-  Future<bool> resetPassword(String email) async {
-    _status = AuthStatus.authenticating;
-    _errorMessage = null;
-    notifyListeners();
+  /// Send Password Reset Link
+  Future<bool> sendPasswordResetEmail({required String email}) async {
+    _setLoading(true);
+    _clearError();
 
     try {
-      await _authRepository.sendPasswordReset(email);
-      _status = AuthStatus.unauthenticated;
-      notifyListeners();
+      await _authService.sendPasswordResetEmail(email: email.trim());
+      _setLoading(false);
       return true;
-    } on AuthException catch (e) {
-      _status = AuthStatus.error;
-      _errorMessage = e.message;
-      notifyListeners();
+    } on FirebaseAuthException catch (e) {
+      _errorMessage = e.message ?? 'An error occurred while resetting password.';
+      _setLoading(false);
+      return false;
+    } catch (e) {
+      _errorMessage = e.toString();
+      _setLoading(false);
       return false;
     }
   }
 
   /// Sign Out
   Future<void> signOut() async {
+    _setLoading(true);
     try {
-      await _authRepository.signOut();
-      _user = null;
-      _status = AuthStatus.unauthenticated;
+      await _authService.signOut();
+      _userId = null;
+      _userEmail = null;
       notifyListeners();
     } catch (e) {
-      _status = AuthStatus.error;
-      _errorMessage = e.toString();
-      notifyListeners();
+      debugPrint('Error signing out: $e');
+    } finally {
+      _setLoading(false);
     }
+  }
+
+  void _setLoading(bool value) {
+    _isLoading = value;
+    notifyListeners();
+  }
+
+  void _clearError() {
+    _errorMessage = null;
   }
 }

@@ -1,4 +1,3 @@
-import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
@@ -12,15 +11,17 @@ class DashboardScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Read user tasks from TaskProvider
     final taskProvider = Provider.of<TaskProvider>(context);
     final tasks = taskProvider.tasks;
     
+    // Calculate simple stats
     final total = tasks.length;
     final completed = tasks.where((t) => t.completed).length;
     final pending = total - completed;
     final percent = total == 0 ? 0.0 : (completed / total);
 
-    // Group tasks by category for the chart
+    // Group tasks by category for simple progress bars
     final categoryCounts = <String, int>{};
     for (var task in tasks) {
       categoryCounts[task.category] = (categoryCounts[task.category] ?? 0) + 1;
@@ -30,7 +31,7 @@ class DashboardScreen extends StatelessWidget {
       body: SafeArea(
         child: RefreshIndicator(
           onRefresh: () async {
-            // Trigger local refresh or mock reload if needed
+            // Pull-to-refresh action (does nothing since data is offline/local)
           },
           child: SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
@@ -38,6 +39,7 @@ class DashboardScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Header section with Date, Title, and Notification Bell Icon
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -66,15 +68,15 @@ class DashboardScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 24),
 
-                // Metrics row (total, completed, pending)
+                // Metrics cards (total, completed, pending, rate)
                 _buildMetricsGrid(context, total, completed, pending, percent),
                 const SizedBox(height: 24),
 
-                // Productivity Chart
-                _buildChartSection(context, categoryCounts, total),
+                // Simple Category Breakdown list (replacing complex fl_chart)
+                _buildCategorySection(context, categoryCounts, total),
                 const SizedBox(height: 24),
 
-                // Quick Activity checklist preview card
+                // Quick Activity/Checklist status card
                 _buildQuickOverviewCard(context, completed, total),
               ],
             ),
@@ -84,6 +86,7 @@ class DashboardScreen extends StatelessWidget {
     );
   }
 
+  // Simple grid of stats cards
   Widget _buildMetricsGrid(
     BuildContext context,
     int total,
@@ -101,7 +104,7 @@ class DashboardScreen extends StatelessWidget {
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       children: [
-        // Total Tasks
+        // Total Tasks Card
         _buildMetricCard(
           context,
           title: 'Total Tasks',
@@ -110,7 +113,7 @@ class DashboardScreen extends StatelessWidget {
           icon: Icons.list_alt_rounded,
           color: AppTheme.primarySeedColor,
         ),
-        // Completed Tasks
+        // Completed Tasks Card
         _buildMetricCard(
           context,
           title: 'Completed',
@@ -119,7 +122,7 @@ class DashboardScreen extends StatelessWidget {
           icon: Icons.check_circle_outline_rounded,
           color: AppTheme.secondaryColor,
         ),
-        // Pending Tasks
+        // Pending Tasks Card
         _buildMetricCard(
           context,
           title: 'Pending',
@@ -128,7 +131,7 @@ class DashboardScreen extends StatelessWidget {
           icon: Icons.pending_actions_rounded,
           color: Colors.orange,
         ),
-        // Completion rate card (Circular indicator)
+        // Simple Circular Indicator Card for Completion Rate
         Card(
           elevation: 0,
           shape: RoundedRectangleBorder(
@@ -176,6 +179,7 @@ class DashboardScreen extends StatelessWidget {
     );
   }
 
+  // Helper widget to construct standard metric cards
   Widget _buildMetricCard(
     BuildContext context, {
     required String title,
@@ -200,18 +204,13 @@ class DashboardScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: color.withValues(alpha: 0.1),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(icon, color: color, size: 20),
-                ),
-              ],
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, color: color, size: 20),
             ),
             const SizedBox(height: 12),
             Column(
@@ -240,13 +239,15 @@ class DashboardScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildChartSection(
+  // Clean and simple list representation of Categories (replacing PieChart)
+  Widget _buildCategorySection(
     BuildContext context,
     Map<String, int> categoryCounts,
     int total,
   ) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
+    // Show empty prompt if there are no tasks
     if (total == 0) {
       return Card(
         elevation: 0,
@@ -260,7 +261,7 @@ class DashboardScreen extends StatelessWidget {
           padding: EdgeInsets.all(24.0),
           child: Center(
             child: Text(
-              'Add tasks to see category analytics.',
+              'Add tasks to see category breakdown.',
               style: TextStyle(color: Colors.grey),
             ),
           ),
@@ -268,6 +269,7 @@ class DashboardScreen extends StatelessWidget {
       );
     }
 
+    // Colors mapping list
     final colors = [
       AppTheme.primarySeedColor,
       AppTheme.secondaryColor,
@@ -278,46 +280,43 @@ class DashboardScreen extends StatelessWidget {
     ];
 
     int colorIndex = 0;
-    final List<PieChartSectionData> sections = [];
-    final List<Widget> legendItems = [];
+    final List<Widget> categoryWidgets = [];
 
     categoryCounts.forEach((category, count) {
       final color = colors[colorIndex % colors.length];
       colorIndex++;
-      final percentage = (count / total) * 100;
+      final ratio = count / total;
 
-      sections.add(
-        PieChartSectionData(
-          color: color,
-          value: count.toDouble(),
-          title: '${percentage.toStringAsFixed(0)}%',
-          radius: 40,
-          titleStyle: const TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
-        ),
-      );
-
-      legendItems.add(
+      categoryWidgets.add(
         Padding(
-          padding: const EdgeInsets.symmetric(vertical: 4.0),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
+          padding: const EdgeInsets.symmetric(vertical: 8.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                width: 12,
-                height: 12,
-                decoration: BoxDecoration(
-                  color: color,
-                  shape: BoxShape.circle,
-                ),
+              // Category title and text metrics
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    category,
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                  ),
+                  Text(
+                    '$count tasks (${(ratio * 100).toStringAsFixed(0)}%)',
+                    style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                  ),
+                ],
               ),
-              const SizedBox(width: 8),
-              Text(
-                '$category ($count)',
-                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+              const SizedBox(height: 6),
+              // Simple progress indicator showing ratio
+              ClipRRect(
+                borderRadius: BorderRadius.circular(4),
+                child: LinearProgressIndicator(
+                  value: ratio,
+                  minHeight: 8,
+                  backgroundColor: isDark ? Colors.grey[800] : Colors.grey[200],
+                  valueColor: AlwaysStoppedAnimation<Color>(color),
+                ),
               ),
             ],
           ),
@@ -342,39 +341,15 @@ class DashboardScreen extends StatelessWidget {
               'Tasks by Category',
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
             ),
-            const SizedBox(height: 24),
-            Row(
-              children: [
-                Expanded(
-                  flex: 3,
-                  child: SizedBox(
-                    height: 120,
-                    child: PieChart(
-                      PieChartData(
-                        sectionsSpace: 4,
-                        centerSpaceRadius: 20,
-                        sections: sections,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  flex: 2,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: legendItems,
-                  ),
-                ),
-              ],
-            ),
+            const SizedBox(height: 12),
+            ...categoryWidgets,
           ],
         ),
       ),
     );
   }
 
+  // Simple bottom checklist overview card
   Widget _buildQuickOverviewCard(BuildContext context, int completed, int total) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final allDone = total > 0 && completed == total;
@@ -433,6 +408,7 @@ class DashboardScreen extends StatelessWidget {
     );
   }
 
+  // App Bar Notification Icon
   Widget _buildBellIcon(BuildContext context) {
     return Consumer<NotificationProvider>(
       builder: (context, notifProvider, child) {

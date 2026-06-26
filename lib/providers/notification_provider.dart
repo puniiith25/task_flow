@@ -186,4 +186,20 @@ class NotificationProvider extends ChangeNotifier {
       debugPrint('Error clearing notifications: $e');
     }
   }
+
+  /// Delete a single notification
+  Future<void> deleteNotification(String id) async {
+    if (_userId == null) return;
+    
+    try {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(_userId)
+          .collection('notifications')
+          .doc(id)
+          .delete();
+    } catch (e) {
+      debugPrint('Error deleting notification: $e');
+    }
+  }
 }

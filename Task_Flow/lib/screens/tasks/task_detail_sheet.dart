@@ -252,6 +252,17 @@ class _TaskDetailSheetState extends State<TaskDetailSheet> {
                         prefixIcon: const Icon(Icons.category_outlined, color: AppTheme.primarySeedColor, size: 20),
                         contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: BorderSide(
+                            color: isDark ? const Color(0xFF374151) : const Color(0xFFD1D5DB),
+                            width: 1,
+                          ),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: const BorderSide(color: AppTheme.primarySeedColor, width: 2),
+                        ),
                       ),
                       items: const [
                         _DropdownItem(value: 'Work', label: 'Work', icon: Icons.work_outline_rounded, color: AppTheme.primarySeedColor),
@@ -290,6 +301,17 @@ class _TaskDetailSheetState extends State<TaskDetailSheet> {
                         prefixIcon: const Icon(Icons.outlined_flag_rounded, color: AppTheme.primarySeedColor, size: 20),
                         contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: BorderSide(
+                            color: isDark ? const Color(0xFF374151) : const Color(0xFFD1D5DB),
+                            width: 1,
+                          ),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: const BorderSide(color: AppTheme.primarySeedColor, width: 2),
+                        ),
                       ),
                       items: const [
                         _DropdownItem(value: 'Low', label: 'Low', icon: Icons.arrow_downward_rounded, color: AppTheme.secondaryColor),

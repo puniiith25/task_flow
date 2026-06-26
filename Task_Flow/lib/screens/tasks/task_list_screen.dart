@@ -147,6 +147,19 @@ class _TaskListScreenState extends State<TaskListScreen> {
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(16),
                         ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: BorderSide(
+                            color: Theme.of(context).brightness == Brightness.dark
+                                ? const Color(0xFF374151)
+                                : const Color(0xFFD1D5DB),
+                            width: 1,
+                          ),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: const BorderSide(color: AppTheme.primarySeedColor, width: 2),
+                        ),
                       ),
                       items: const [
                         _DropdownItem(value: 'All', label: 'All', icon: Icons.filter_list_rounded, color: Colors.grey),
@@ -196,6 +209,19 @@ class _TaskListScreenState extends State<TaskListScreen> {
                         prefixIcon: const Icon(Icons.donut_large_rounded, color: AppTheme.primarySeedColor, size: 20),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(16),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: BorderSide(
+                            color: Theme.of(context).brightness == Brightness.dark
+                                ? const Color(0xFF374151)
+                                : const Color(0xFFD1D5DB),
+                            width: 1,
+                          ),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: const BorderSide(color: AppTheme.primarySeedColor, width: 2),
                         ),
                       ),
                       items: const [

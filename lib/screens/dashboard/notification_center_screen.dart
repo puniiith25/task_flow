@@ -85,64 +85,88 @@ class NotificationCenterScreen extends StatelessWidget {
                   iconColor = AppTheme.secondaryColor;
                 }
 
-                return ListTile(
-                  onTap: () {
-                    notifProvider.markAsRead(item.id);
-                  },
-                  tileColor: item.isRead 
-                      ? Colors.transparent 
-                      : (isDark ? const Color(0xFF374151).withValues(alpha: 0.2) : AppTheme.primarySeedColor.withValues(alpha: 0.05)),
-                  leading: Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: iconColor.withValues(alpha: 0.1),
-                      shape: BoxShape.circle,
+                return Dismissible(
+                  key: Key(item.id),
+                  direction: DismissDirection.endToStart,
+                  background: Container(
+                    color: Colors.redAccent,
+                    alignment: Alignment.centerRight,
+                    padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                    child: const Icon(
+                      Icons.delete_outline_rounded,
+                      color: Colors.white,
+                      size: 26,
                     ),
-                    child: Icon(iconData, color: iconColor, size: 22),
                   ),
-                  title: Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          item.title,
-                          style: TextStyle(
-                            fontWeight: item.isRead ? FontWeight.w600 : FontWeight.bold,
-                            fontSize: 14,
-                          ),
-                        ),
+                  onDismissed: (direction) {
+                    notifProvider.deleteNotification(item.id);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: const Text('Notification deleted'),
+                        behavior: SnackBarBehavior.floating,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                       ),
-                      if (!item.isRead)
-                        Container(
-                          width: 8,
-                          height: 8,
-                          decoration: const BoxDecoration(
-                            color: Colors.redAccent,
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                    ],
-                  ),
-                  subtitle: Padding(
-                    padding: const EdgeInsets.only(top: 4.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    );
+                  },
+                  child: ListTile(
+                    onTap: () {
+                      notifProvider.markAsRead(item.id);
+                    },
+                    tileColor: item.isRead 
+                        ? Colors.transparent 
+                        : (isDark ? const Color(0xFF374151).withValues(alpha: 0.2) : AppTheme.primarySeedColor.withValues(alpha: 0.05)),
+                    leading: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: iconColor.withValues(alpha: 0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(iconData, color: iconColor, size: 22),
+                    ),
+                    title: Row(
                       children: [
-                        Text(
-                          item.body,
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: isDark ? Colors.grey[400] : Colors.grey[700],
+                        Expanded(
+                          child: Text(
+                            item.title,
+                            style: TextStyle(
+                              fontWeight: item.isRead ? FontWeight.w600 : FontWeight.bold,
+                              fontSize: 14,
+                            ),
                           ),
                         ),
-                        const SizedBox(height: 6),
-                        Text(
-                          _formatTime(item.timestamp),
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: Colors.grey[500],
+                        if (!item.isRead)
+                          Container(
+                            width: 8,
+                            height: 8,
+                            decoration: const BoxDecoration(
+                              color: Colors.redAccent,
+                              shape: BoxShape.circle,
+                            ),
                           ),
-                        ),
                       ],
+                    ),
+                    subtitle: Padding(
+                      padding: const EdgeInsets.only(top: 4.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            item.body,
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: isDark ? Colors.grey[400] : Colors.grey[700],
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            _formatTime(item.timestamp),
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: Colors.grey[500],
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 );

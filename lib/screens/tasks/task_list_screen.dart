@@ -489,3 +489,17 @@ class _TaskListScreenState extends State<TaskListScreen> {
     );
   }
 }
+
+class _DropdownItem {
+  final String value;
+  final String label;
+  final IconData icon;
+  final Color color;
+
+  const _DropdownItem({
+    required this.value,
+    required this.label,
+    required this.icon,
+    required this.color,
+  });
+}

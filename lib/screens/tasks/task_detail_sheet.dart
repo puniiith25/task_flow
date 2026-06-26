@@ -24,9 +24,6 @@ class _TaskDetailSheetState extends State<TaskDetailSheet> {
   late DateTime _selectedDate;
   late TimeOfDay _selectedTime;
 
-  final List<String> _categories = ['Work', 'Personal', 'Shopping', 'Health', 'Others'];
-  final List<String> _priorities = ['Low', 'Medium', 'High'];
-
   @override
   void initState() {
     super.initState();
@@ -247,15 +244,31 @@ class _TaskDetailSheetState extends State<TaskDetailSheet> {
                     child: DropdownButtonFormField<String>(
                       isExpanded: true,
                       initialValue: _selectedCategory,
-                      decoration: const InputDecoration(
+                      dropdownColor: isDark ? const Color(0xFF1F2937) : Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      icon: const Icon(Icons.keyboard_arrow_down_rounded, color: AppTheme.primarySeedColor),
+                      decoration: InputDecoration(
                         labelText: 'Category',
-                        prefixIcon: Icon(Icons.category_outlined),
-                        contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                        prefixIcon: const Icon(Icons.category_outlined, color: AppTheme.primarySeedColor, size: 20),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
                       ),
-                      items: _categories.map((cat) {
-                        return DropdownMenuItem(
-                          value: cat,
-                          child: Text(cat, style: const TextStyle(fontSize: 14)),
+                      items: const [
+                        _DropdownItem(value: 'Work', label: 'Work', icon: Icons.work_outline_rounded, color: AppTheme.primarySeedColor),
+                        _DropdownItem(value: 'Personal', label: 'Personal', icon: Icons.person_outline_rounded, color: Colors.orange),
+                        _DropdownItem(value: 'Shopping', label: 'Shopping', icon: Icons.shopping_bag_outlined, color: Colors.pink),
+                        _DropdownItem(value: 'Health', label: 'Health', icon: Icons.favorite_border_rounded, color: Colors.redAccent),
+                        _DropdownItem(value: 'Others', label: 'Others', icon: Icons.more_horiz_rounded, color: Colors.grey),
+                      ].map((item) {
+                        return DropdownMenuItem<String>(
+                          value: item.value,
+                          child: Row(
+                            children: [
+                              Icon(item.icon, color: item.color, size: 16),
+                              const SizedBox(width: 6),
+                              Text(item.label, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500)),
+                            ],
+                          ),
                         );
                       }).toList(),
                       onChanged: (val) {
@@ -269,15 +282,29 @@ class _TaskDetailSheetState extends State<TaskDetailSheet> {
                     child: DropdownButtonFormField<String>(
                       isExpanded: true,
                       initialValue: _selectedPriority,
-                      decoration: const InputDecoration(
+                      dropdownColor: isDark ? const Color(0xFF1F2937) : Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      icon: const Icon(Icons.keyboard_arrow_down_rounded, color: AppTheme.primarySeedColor),
+                      decoration: InputDecoration(
                         labelText: 'Priority',
-                        prefixIcon: Icon(Icons.outlined_flag_rounded),
-                        contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                        prefixIcon: const Icon(Icons.outlined_flag_rounded, color: AppTheme.primarySeedColor, size: 20),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
                       ),
-                      items: _priorities.map((prio) {
-                        return DropdownMenuItem(
-                          value: prio,
-                          child: Text(prio, style: const TextStyle(fontSize: 14)),
+                      items: const [
+                        _DropdownItem(value: 'Low', label: 'Low', icon: Icons.arrow_downward_rounded, color: AppTheme.secondaryColor),
+                        _DropdownItem(value: 'Medium', label: 'Medium', icon: Icons.horizontal_rule_rounded, color: Colors.orange),
+                        _DropdownItem(value: 'High', label: 'High', icon: Icons.arrow_upward_rounded, color: Colors.redAccent),
+                      ].map((item) {
+                        return DropdownMenuItem<String>(
+                          value: item.value,
+                          child: Row(
+                            children: [
+                              Icon(item.icon, color: item.color, size: 16),
+                              const SizedBox(width: 6),
+                              Text(item.label, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500)),
+                            ],
+                          ),
                         );
                       }).toList(),
                       onChanged: (val) {
@@ -338,4 +365,18 @@ class _TaskDetailSheetState extends State<TaskDetailSheet> {
       ),
     );
   }
+}
+
+class _DropdownItem {
+  final String value;
+  final String label;
+  final IconData icon;
+  final Color color;
+
+  const _DropdownItem({
+    required this.value,
+    required this.label,
+    required this.icon,
+    required this.color,
+  });
 }

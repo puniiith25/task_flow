@@ -132,22 +132,39 @@ class _TaskListScreenState extends State<TaskListScreen> {
                     child: DropdownButtonFormField<String>(
                       isExpanded: true,
                       initialValue: _selectedPriorityFilter,
-                      decoration: const InputDecoration(
+                      dropdownColor: Theme.of(context).brightness == Brightness.dark
+                          ? const Color(0xFF1F2937)
+                          : Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      icon: const Icon(Icons.keyboard_arrow_down_rounded, color: AppTheme.primarySeedColor),
+                      decoration: InputDecoration(
                         labelText: 'Priority',
-                        contentPadding: EdgeInsets.symmetric(
+                        contentPadding: const EdgeInsets.symmetric(
                           horizontal: 12,
-                          vertical: 8,
+                          vertical: 12,
                         ),
-                        border: OutlineInputBorder(),
+                        prefixIcon: const Icon(Icons.outlined_flag_rounded, color: AppTheme.primarySeedColor, size: 20),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
                       ),
-                      items: ['All', 'Low', 'Medium', 'High'].map((
-                        String priority,
-                      ) {
+                      items: const [
+                        _DropdownItem(value: 'All', label: 'All', icon: Icons.filter_list_rounded, color: Colors.grey),
+                        _DropdownItem(value: 'Low', label: 'Low', icon: Icons.arrow_downward_rounded, color: AppTheme.secondaryColor),
+                        _DropdownItem(value: 'Medium', label: 'Medium', icon: Icons.horizontal_rule_rounded, color: Colors.orange),
+                        _DropdownItem(value: 'High', label: 'High', icon: Icons.arrow_upward_rounded, color: Colors.redAccent),
+                      ].map((item) {
                         return DropdownMenuItem<String>(
-                          value: priority,
-                          child: Text(
-                            priority,
-                            style: const TextStyle(fontSize: 13),
+                          value: item.value,
+                          child: Row(
+                            children: [
+                              Icon(item.icon, color: item.color, size: 16),
+                              const SizedBox(width: 6),
+                              Text(
+                                item.label,
+                                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+                              ),
+                            ],
                           ),
                         );
                       }).toList(),
@@ -165,22 +182,38 @@ class _TaskListScreenState extends State<TaskListScreen> {
                     child: DropdownButtonFormField<String>(
                       isExpanded: true,
                       initialValue: _selectedStatusFilter,
-                      decoration: const InputDecoration(
+                      dropdownColor: Theme.of(context).brightness == Brightness.dark
+                          ? const Color(0xFF1F2937)
+                          : Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      icon: const Icon(Icons.keyboard_arrow_down_rounded, color: AppTheme.primarySeedColor),
+                      decoration: InputDecoration(
                         labelText: 'Status',
-                        contentPadding: EdgeInsets.symmetric(
+                        contentPadding: const EdgeInsets.symmetric(
                           horizontal: 12,
-                          vertical: 8,
+                          vertical: 12,
                         ),
-                        border: OutlineInputBorder(),
+                        prefixIcon: const Icon(Icons.donut_large_rounded, color: AppTheme.primarySeedColor, size: 20),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
                       ),
-                      items: ['All', 'Active', 'Completed'].map((
-                        String status,
-                      ) {
+                      items: const [
+                        _DropdownItem(value: 'All', label: 'All', icon: Icons.border_all_rounded, color: Colors.grey),
+                        _DropdownItem(value: 'Active', label: 'Active', icon: Icons.radio_button_unchecked_rounded, color: AppTheme.primarySeedColor),
+                        _DropdownItem(value: 'Completed', label: 'Done', icon: Icons.check_circle_rounded, color: AppTheme.secondaryColor),
+                      ].map((item) {
                         return DropdownMenuItem<String>(
-                          value: status,
-                          child: Text(
-                            status,
-                            style: const TextStyle(fontSize: 13),
+                          value: item.value,
+                          child: Row(
+                            children: [
+                              Icon(item.icon, color: item.color, size: 16),
+                              const SizedBox(width: 6),
+                              Text(
+                                item.label,
+                                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+                              ),
+                            ],
                           ),
                         );
                       }).toList(),

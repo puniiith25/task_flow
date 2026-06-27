@@ -66,6 +66,7 @@ class _TaskDetailSheetState extends State<TaskDetailSheet> {
     final TimeOfDay? picked = await showTimePicker(
       context: context,
       initialTime: _selectedTime,
+      initialEntryMode: TimePickerEntryMode.input,
     );
     if (picked != null) {
       setState(() {

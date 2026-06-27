@@ -5,10 +5,10 @@ class AppConfig {
   // ==========================================
   static const String emailJsServiceId =
       "service_bdfpobf"; // e.g. "service_xxxxxxx"
-  static const String emailJsTemplateId = "";
-  // "template_r7w8jaa"; // e.g. "template_xxxxxxx"
-  static const String emailJsPublicKey =
-      "MBuCjIAPQhg0hCVhP"; // e.g. "user_xxxxxxxxxxxxxxx"
+  static const String emailJsTemplateId =
+      "template_r7w8jaa"; // e.g. "template_xxxxxxx"
+  static const String emailJsPublicKey = "";
+  // "MBuCjIAPQhg0hCVhP"; // e.g. "user_xxxxxxxxxxxxxxx"
 
   // ==========================================
   // EMAIL CONFIGURATION (Direct SMTP) - ALTERNATIVE

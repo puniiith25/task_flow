@@ -73,6 +73,14 @@ class Validators {
     return null;
   }
 
+  /// Simple password validation for login (non-empty check only)
+  static String? validateLoginPassword(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Password is required';
+    }
+    return null;
+  }
+
   /// Validates that password and confirm password fields match
   static String? validateConfirmPassword(String? value, String password) {
     if (value == null || value.isEmpty) {
@@ -81,22 +89,6 @@ class Validators {
     
     if (value != password) {
       return 'Passwords do not match';
-    }
-    
-    return null;
-  }
-
-  /// Validates phone number format (+ followed by country code and number)
-  static String? validatePhone(String? value) {
-    if (value == null || value.trim().isEmpty) {
-      return 'Phone number is required';
-    }
-    
-    final phone = value.trim();
-    final phoneRegex = RegExp(r'^\+[1-9]\d{1,14}$'); // E.164 phone number format
-
-    if (!phoneRegex.hasMatch(phone)) {
-      return 'Enter a valid phone number with country code (e.g. +16505553434)';
     }
     
     return null;

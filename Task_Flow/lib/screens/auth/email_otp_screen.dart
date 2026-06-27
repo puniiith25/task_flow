@@ -85,25 +85,8 @@ class _EmailOtpScreenState extends State<EmailOtpScreen> {
 
     if (mounted) {
       if (success) {
-        // Trigger sending Phone SMS OTP
-        final phone = authProvider.userPhone ?? '';
-        final phoneSent = await authProvider.sendPhoneOtp(phone);
-        
         if (mounted) {
-          if (phoneSent) {
-            Navigator.pushReplacementNamed(context, AppRouter.phoneOtp);
-          } else {
-            // Even if phone verification fails to trigger, show error, but direct them to Phone Screen so they can try again/resend
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(authProvider.errorMessage ?? 'Failed to send SMS OTP. Please try resending.'),
-                backgroundColor: Colors.redAccent,
-                behavior: SnackBarBehavior.floating,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-              ),
-            );
-            Navigator.pushReplacementNamed(context, AppRouter.phoneOtp);
-          }
+          Navigator.pushReplacementNamed(context, AppRouter.root);
         }
       } else {
         ScaffoldMessenger.of(context).showSnackBar(

@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import '../core/theme.dart';
 
 class PresetAvatarInfo {
@@ -97,14 +98,23 @@ class AvatarWidget extends StatelessWidget {
         backgroundColor: AppTheme.primarySeedColor,
         child: Icon(Icons.person_rounded, size: radius, color: Colors.white),
       );
-    } else if (avatarString.startsWith('/') || avatarString.startsWith('file://')) {
+    } else if (!kIsWeb && (avatarString.startsWith('/') || avatarString.startsWith('file://'))) {
       final cleanPath = avatarString.startsWith('file://')
           ? avatarString.replaceFirst('file://', '')
           : avatarString;
-      avatarWidget = CircleAvatar(
-        radius: radius,
-        backgroundImage: FileImage(File(cleanPath)),
-      );
+      final file = File(cleanPath);
+      if (file.existsSync()) {
+        avatarWidget = CircleAvatar(
+          radius: radius,
+          backgroundImage: FileImage(file),
+        );
+      } else {
+        avatarWidget = CircleAvatar(
+          radius: radius,
+          backgroundColor: AppTheme.primarySeedColor,
+          child: Icon(Icons.person_rounded, size: radius, color: Colors.white),
+        );
+      }
     } else if (avatarString.startsWith('http://') || avatarString.startsWith('https://')) {
       avatarWidget = CircleAvatar(
         radius: radius,

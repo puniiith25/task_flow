@@ -31,9 +31,11 @@ void main() async {
   // 1b. Initialize Firebase App Check dynamically (resilient setup for security)
   try {
     await FirebaseAppCheck.instance.activate(
-      webProvider: AppConfig.recaptchaV3SiteKey.isNotEmpty
-          ? ReCaptchaV3Provider(AppConfig.recaptchaV3SiteKey)
-          : null,
+      webProvider: kDebugMode
+          ? null
+          : (AppConfig.recaptchaV3SiteKey.isNotEmpty
+              ? ReCaptchaV3Provider(AppConfig.recaptchaV3SiteKey)
+              : null),
       androidProvider: kDebugMode ? AndroidProvider.debug : AndroidProvider.playIntegrity,
       appleProvider: kDebugMode ? AppleProvider.debug : AppleProvider.deviceCheck,
     );

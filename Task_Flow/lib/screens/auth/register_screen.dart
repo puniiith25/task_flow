@@ -17,6 +17,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+  final _phoneController = TextEditingController();
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
 
@@ -25,6 +26,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
+    _phoneController.dispose();
     super.dispose();
   }
 
@@ -38,11 +40,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
     final success = await authProvider.createUserWithEmailAndPassword(
       email: _emailController.text.trim(),
       password: _passwordController.text,
+      phone: _phoneController.text.trim(),
     );
 
     if (mounted) {
       if (success) {
-        Navigator.pushReplacementNamed(context, AppRouter.dashboard);
+        Navigator.pushReplacementNamed(context, AppRouter.emailOtp);
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -106,6 +109,20 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       prefixIcon: Icon(Icons.email_outlined),
                     ),
                     validator: Validators.validateEmail,
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Phone Number
+                  TextFormField(
+                    controller: _phoneController,
+                    keyboardType: TextInputType.phone,
+                    textInputAction: TextInputAction.next,
+                    decoration: const InputDecoration(
+                      hintText: 'Enter your phone (e.g. +16505553434)',
+                      labelText: 'Phone Number',
+                      prefixIcon: Icon(Icons.phone_outlined),
+                    ),
+                    validator: Validators.validatePhone,
                   ),
                   const SizedBox(height: 16),
 

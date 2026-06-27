@@ -52,6 +52,14 @@ dependencies:
   cloud_firestore: ^5.0.1
   firebase_messaging: ^15.0.1
 
+  # Social Logins and Image Picker
+  google_sign_in: ^6.2.1
+  flutter_facebook_auth: ^6.1.0
+  image_picker: ^1.1.2
+  http: ^1.2.1
+  mailer: ^6.0.1
+  firebase_app_check: ^0.3.2+10
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

@@ -8,6 +8,8 @@ import '../../providers/theme_provider.dart';
 import '../../providers/task_provider.dart';
 import '../../providers/notification_provider.dart';
 import '../../services/notification_service.dart';
+import '../../widgets/avatar_widget.dart';
+import '../auth/avatar_selection_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -123,17 +125,36 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 padding: const EdgeInsets.all(16.0),
                 child: Row(
                   children: [
-                    CircleAvatar(
-                      radius: 28,
-                      backgroundColor: AppTheme.primarySeedColor,
-                      child: Text(
-                        userEmail.substring(0, 1).toUpperCase(),
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 20,
+                    Stack(
+                      children: [
+                        AvatarWidget(
+                          avatarString: authProvider.profileImageUrl,
+                          radius: 30,
                         ),
-                      ),
+                        Positioned(
+                          right: 0,
+                          bottom: 0,
+                          child: GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const AvatarSelectionScreen(isEditMode: true),
+                                ),
+                              );
+                            },
+                            child: CircleAvatar(
+                              radius: 10,
+                              backgroundColor: AppTheme.primarySeedColor,
+                              child: const Icon(
+                                Icons.edit_rounded,
+                                size: 10,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                     const SizedBox(width: 16),
                     Expanded(

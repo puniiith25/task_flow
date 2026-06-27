@@ -25,6 +25,41 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
+  void _signInWithGoogle() async {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final success = await authProvider.signInWithGoogle();
+    if (mounted) {
+      if (success) {
+        Navigator.pushReplacementNamed(context, AppRouter.dashboard);
+      } else {
+        _showErrorSnackBar(authProvider.errorMessage ?? 'Google login failed.');
+      }
+    }
+  }
+
+  void _signInWithFacebook() async {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final success = await authProvider.signInWithFacebook();
+    if (mounted) {
+      if (success) {
+        Navigator.pushReplacementNamed(context, AppRouter.dashboard);
+      } else {
+        _showErrorSnackBar(authProvider.errorMessage ?? 'Facebook login failed.');
+      }
+    }
+  }
+
+  void _showErrorSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.redAccent,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      ),
+    );
+  }
+
   void _submit() async {
     if (_formKey.currentState == null || !_formKey.currentState!.validate()) {
       return;
@@ -41,14 +76,7 @@ class _LoginScreenState extends State<LoginScreen> {
       if (success) {
         Navigator.pushReplacementNamed(context, AppRouter.dashboard);
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(authProvider.errorMessage ?? 'Login failed. Please try again.'),
-            backgroundColor: Colors.redAccent,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-          ),
-        );
+        _showErrorSnackBar(authProvider.errorMessage ?? 'Login failed. Please try again.');
       }
     }
   }
@@ -160,6 +188,57 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                           )
                         : const Text('Login'),
+                  ),
+                  const SizedBox(height: 20),
+                  Row(
+                    children: [
+                      const Expanded(child: Divider()),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                        child: Text(
+                          'OR CONTINUE WITH',
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.grey[500],
+                            letterSpacing: 1.0,
+                          ),
+                        ),
+                      ),
+                      const Expanded(child: Divider()),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          onPressed: authProvider.isLoading ? null : _signInWithGoogle,
+                          icon: const Icon(Icons.g_mobiledata_rounded, size: 28),
+                          label: const Text('Google'),
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          onPressed: authProvider.isLoading ? null : _signInWithFacebook,
+                          icon: const Icon(Icons.facebook_rounded, size: 24),
+                          label: const Text('Facebook'),
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 24),
 

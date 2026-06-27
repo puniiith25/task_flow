@@ -4,6 +4,9 @@ import '../../core/theme.dart';
 import '../../providers/auth_provider.dart';
 import '../main_navigation_scaffold.dart';
 import 'login_screen.dart';
+import 'email_otp_screen.dart';
+import 'phone_otp_screen.dart';
+import 'avatar_selection_screen.dart';
 
 class AuthWrapper extends StatelessWidget {
   const AuthWrapper({super.key});
@@ -34,6 +37,15 @@ class AuthWrapper extends StatelessWidget {
 
     // Direct user based on auth state
     if (authProvider.isAuthenticated) {
+      if (!authProvider.isEmailOtpVerified) {
+        return const EmailOtpScreen();
+      }
+      if (!authProvider.isPhoneOtpVerified) {
+        return const PhoneOtpScreen();
+      }
+      if (authProvider.profileImageUrl.isEmpty) {
+        return const AvatarSelectionScreen();
+      }
       return const MainNavigationScaffold();
     } else {
       return const LoginScreen();

@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_app_check/firebase_app_check.dart';
 import 'firebase_options.dart';
 import 'core/theme.dart';
+import 'core/config.dart';
 import 'core/router.dart';
 import 'providers/auth_provider.dart';
 import 'providers/theme_provider.dart';
@@ -25,10 +28,30 @@ void main() async {
     debugPrint("Firebase initialization failed: $e");
   }
 
+  // 1b. Initialize Firebase App Check dynamically (resilient setup for security)
+  try {
+    await FirebaseAppCheck.instance.activate(
+      webProvider: AppConfig.recaptchaV3SiteKey.isNotEmpty
+          ? ReCaptchaV3Provider(AppConfig.recaptchaV3SiteKey)
+          : null,
+      androidProvider: kDebugMode ? AndroidProvider.debug : AndroidProvider.playIntegrity,
+      appleProvider: kDebugMode ? AppleProvider.debug : AppleProvider.deviceCheck,
+    );
+    debugPrint("Firebase App Check initialized successfully.");
+  } catch (e) {
+    debugPrint("Firebase App Check initialization failed: $e");
+  }
+
   // 2. Initialize Notification System (FCM and Local Scheduled Notifications)
-  final notificationService = NotificationService();
-  await notificationService.init();
-  await notificationService.requestPermissions();
+  try {
+    final notificationService = NotificationService();
+    await notificationService.init();
+    await notificationService.requestPermissions();
+    debugPrint("Notification System initialized successfully.");
+  } catch (e, stackTrace) {
+    debugPrint("Notification System initialization failed: $e");
+    debugPrint(stackTrace.toString());
+  }
 
   // 3. Set up repository singleton
   final taskRepository = TaskRepositoryImpl();

@@ -2,9 +2,6 @@
 
 TaskFlow is a modern, premium cross-platform task management application built with Flutter. It helps users organize their daily schedules, manage priorities, track deadlines, and sync tasks in real time using Firebase Cloud Firestore.
 
-> [!NOTE]
-> The active Flutter project code is located in the [Task_Flow](file:///Users/punith25/VS-CODE/taskflow/Task_Flow) directory. Please navigate into the `Task_Flow` directory to install dependencies and run commands.
-
 ---
 
 ## 📱 Features
@@ -43,7 +40,7 @@ TaskFlow is a modern, premium cross-platform task management application built w
 ### Project Architecture & Folder Structure
 
 ```text
-Task_Flow/lib/
+lib/
 ├── core/                  # Global styling, themes & routing
 │   ├── router.dart        # Route registry (Root AuthWrapper, Login, Dashboard, etc.)
 │   └── theme.dart         # Custom Dark/Light theme values
@@ -78,9 +75,8 @@ Task_Flow/lib/
 2. Set up simulator, emulator, or physical device targets.
 
 #### Step 1: Install Dependencies
-Open the `Task_Flow` directory and fetch packages:
+Open the project directory and fetch packages:
 ```bash
-cd Task_Flow
 flutter pub get
 ```
 
@@ -103,13 +99,12 @@ flutter run
 #### Generate App Launcher Icons
 Generate responsive, correctly-formatted launcher icons from `assets/icon/app_icon.png` for all platforms:
 ```bash
-cd Task_Flow
 dart run flutter_launcher_icons
 ```
+*Note: Configured in [flutter_launcher_icons.yaml](file:///Users/punith25/VS-CODE/taskflow/Task_Flow/flutter_launcher_icons.yaml).*
 
 #### Run Static Code Analysis
 Audit code formatting and linting rules:
 ```bash
-cd Task_Flow
 flutter analyze
 ```

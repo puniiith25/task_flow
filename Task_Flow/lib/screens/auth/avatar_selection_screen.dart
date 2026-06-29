@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:image_picker/image_picker.dart';
 import '../../core/theme.dart';
 import '../../core/router.dart';
 import '../../providers/auth_provider.dart';
@@ -20,7 +19,6 @@ class AvatarSelectionScreen extends StatefulWidget {
 
 class _AvatarSelectionScreenState extends State<AvatarSelectionScreen> {
   String _selectedAvatar = 'avatar_developer';
-  final ImagePicker _picker = ImagePicker();
 
   @override
   void initState() {
@@ -36,32 +34,7 @@ class _AvatarSelectionScreenState extends State<AvatarSelectionScreen> {
     });
   }
 
-  Future<void> _pickFromGallery() async {
-    try {
-      final XFile? image = await _picker.pickImage(
-        source: ImageSource.gallery,
-        maxWidth: 512,
-        maxHeight: 512,
-        imageQuality: 85,
-      );
 
-      if (image != null) {
-        setState(() {
-          _selectedAvatar = image.path; // Store the absolute path directly
-        });
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error picking image: $e'),
-            backgroundColor: Colors.redAccent,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-      }
-    }
-  }
 
   void _saveProfile() async {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
@@ -99,7 +72,6 @@ class _AvatarSelectionScreenState extends State<AvatarSelectionScreen> {
   @override
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
       appBar: AppBar(
@@ -135,7 +107,7 @@ class _AvatarSelectionScreenState extends State<AvatarSelectionScreen> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Choose an avatar or upload your own to personalize your account.',
+                  'Choose an avatar to personalize your account.',
                   textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: Colors.grey[500],
@@ -215,39 +187,6 @@ class _AvatarSelectionScreenState extends State<AvatarSelectionScreen> {
                 },
               ),
               const SizedBox(height: 32),
-
-              Text(
-                'Custom Option',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                  color: AppTheme.primarySeedColor,
-                  letterSpacing: 0.5,
-                ),
-              ),
-              const SizedBox(height: 12),
-
-              // Choose from Gallery Button Card
-              Card(
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  side: BorderSide(
-                    color: isDark ? const Color(0xFF374151) : const Color(0xFFE5E7EB),
-                  ),
-                ),
-                child: ListTile(
-                  leading: CircleAvatar(
-                    backgroundColor: AppTheme.primarySeedColor.withValues(alpha: 0.1),
-                    child: const Icon(Icons.add_photo_alternate_rounded, color: AppTheme.primarySeedColor),
-                  ),
-                  title: const Text('Choose from Gallery', style: TextStyle(fontWeight: FontWeight.bold)),
-                  subtitle: const Text('Pick a custom photo from your device'),
-                  trailing: const Icon(Icons.chevron_right_rounded),
-                  onTap: _pickFromGallery,
-                ),
-              ),
-              const SizedBox(height: 48),
 
               // Save button
               ElevatedButton(
